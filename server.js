@@ -1,5 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
 
@@ -7,11 +8,18 @@ const app = express();
 app.use(express.json());
 
 app.post('/users', async (req, res) => {
+
+    const saltRounds = 10;
+    const password = req.body.password
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     await prisma.user.create({
         data: {
             email: req.body.email,
             name: req.body.name,
-            age: req.body.age
+            age: req.body.age,
+            password: hashedPassword
         }
     })
 
@@ -27,13 +35,14 @@ app.get('/users', async (req, res) => {
             where: {
                 name: req.query.name,
                 email: req.query.email,
-                age: req.query
+                age: req.query,
+                password: users.password
             }
         })
     } else {
-       const users = await prisma.user.findMany() 
+        const users = await prisma.user.findMany()
     }
-    
+
     res.status(200).json(users)
 });
 
@@ -60,7 +69,7 @@ app.delete('/users/:id', async (req, res) => {
         }
     })
 
-    res.status(200).json({message: "Usuário deletado com sucesso!"})
+    res.status(200).json({ message: "Usuário deletado com sucesso!" })
 })
 
 
