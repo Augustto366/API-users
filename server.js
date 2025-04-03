@@ -5,6 +5,17 @@ import cors from 'cors';
 
 const prisma = new PrismaClient()
 
+async function main() {
+  try {
+    await prisma.$connect();
+    console.log("✅ Conectado ao MongoDB com Prisma!");
+  } catch (error) {
+    console.error("❌ Erro ao conectar ao MongoDB:", error);
+  }
+}
+
+main()
+
 const app = express();
 app.use(express.json());
 app.use(cors());
